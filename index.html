@@ -1111,217 +1111,360 @@ function initMediaPipe() {
 }
 
 // =====================================================================
-// GESTURE CLASSIFICATION — IMPROVED ACCURACY
+// GESTURE CLASSIFICATION — REWRITTEN v3 (normalized, accurate)
 // =====================================================================
-const TIP=[4,8,12,16,20], PIP=[3,7,11,15,19], MCP=[2,5,9,13,17];
+const TIP=[4,8,12,16,20], DIP=[3,7,11,15,19], PIP=[2,6,10,14,18], MCP=[1,5,9,13,17];
 
+// 3D Euclidean distance
 function dist(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);}
+// 2D distance (x,y only)
 function dist2d(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
 
-// Returns [thumb_extended, index, middle, ring, pinky]
-// More reliable: compare tip to MCP not PIP for better fold detection
-function fingerState(lm) {
-  const fs=[];
-  // Thumb: compare tip.x vs IP joint (account for handedness via wrist-mcp direction)
-  const wrist=lm[0], thumbMCP=lm[2], thumbIP=lm[3], thumbTIP=lm[4];
-  const thumbDir = thumbTIP.x < thumbIP.x; // left hand mirrored: tip left of IP = extended
-  fs.push(thumbDir ? 1 : 0);
-  // Fingers: tip.y < MCP.y (higher on screen = extended), with 3D depth consideration
-  for(let i=1;i<=4;i++){
-    const tip=lm[TIP[i]], pip=lm[PIP[i]], mcp=lm[MCP[i]];
-    // Extended if tip is clearly above PIP and PIP above MCP
-    const extended = (tip.y < pip.y - 0.02);
-    fs.push(extended ? 1 : 0);
+// Normalize all measurements by palm size (wrist→middle-MCP distance)
+// This makes detection consistent regardless of hand distance from camera
+function getPalmSize(lm) {
+  return dist(lm[0], lm[9]) || 0.001;
+}
+
+// Returns normalized curl for each finger (0 = fully extended, 1 = fully curled)
+// Uses tip-to-MCP vs pip-to-MCP ratio, normalized by palm size
+function fingerCurls(lm) {
+  const palm = getPalmSize(lm);
+  const curls = [];
+  for(let i=1; i<=4; i++) {
+    const tip = lm[TIP[i]], pip = lm[PIP[i]], mcp = lm[MCP[i]];
+    // Distance from tip to wrist vs ideal extended distance
+    const extended_d = dist(lm[0], mcp) + dist(mcp, pip) * 1.5; // expected max
+    const actual_d   = dist(lm[0], tip);
+    const curl = 1 - Math.min(1, actual_d / (extended_d * 0.85));
+    curls.push(Math.max(0, curl));
   }
-  return fs;
+  return curls; // [index_curl, middle_curl, ring_curl, pinky_curl]
 }
 
-// Curl ratio: how curled each finger is (0=straight, 1=fully curled)
-function curlRatio(lm, fingerIdx) {
-  const tip=lm[TIP[fingerIdx]], pip=lm[PIP[fingerIdx]], mcp=lm[MCP[fingerIdx]];
-  const straight=dist(mcp,lm[0])*0.7; // approximate max extension
-  const actual=dist(tip,mcp);
-  return Math.max(0,Math.min(1, 1 - actual/straight));
+// Returns true/false for each finger being UP (extended)
+// Threshold tuned per finger based on curl ratio
+function fingersUp(lm) {
+  const [ci, cm, cr, cp] = fingerCurls(lm);
+  const thresh = 0.45; // below this curl = extended
+  return {
+    index:  ci < thresh,
+    middle: cm < thresh,
+    ring:   cr < thresh,
+    pinky:  cp < thresh,
+    // Curl values for fine-grained checks
+    ci, cm, cr, cp
+  };
 }
 
-function angle3(a,b,c) {
-  const ab={x:a.x-b.x,y:a.y-b.y}, cb={x:c.x-b.x,y:c.y-b.y};
-  const dot=ab.x*cb.x+ab.y*cb.y;
-  const mag=Math.sqrt(ab.x**2+ab.y**2)*Math.sqrt(cb.x**2+cb.y**2);
-  return Math.acos(Math.max(-1,Math.min(1,dot/mag)))*180/Math.PI;
+// Robust thumb detection using hand orientation vector
+// Compares thumb tip vs thumb base relative to the hand's lateral axis
+function isThumbExtended(lm) {
+  const wrist    = lm[0];
+  const indexMCP = lm[5];
+  const thumbTip = lm[4];
+  const thumbIP  = lm[3];
+  const thumbMCP = lm[2];
+
+  // Vector along palm base (wrist → index MCP)
+  const palmVecX = indexMCP.x - wrist.x;
+  const palmVecY = indexMCP.y - wrist.y;
+
+  // Project thumb tip relative to thumb IP onto the perpendicular of palm vec
+  const dx = thumbTip.x - thumbIP.x;
+  const dy = thumbTip.y - thumbIP.y;
+
+  // Perpendicular to palm vector: (-palmVecY, palmVecX)
+  const perpX = -palmVecY;
+  const perpY = palmVecX;
+  const perpLen = Math.sqrt(perpX*perpX + perpY*perpY) || 0.001;
+
+  // Dot product of (dx,dy) with normalized perpendicular
+  const proj = (dx * perpX + dy * perpY) / perpLen;
+  const palm = getPalmSize(lm);
+
+  // Thumb is extended if it sticks out significantly perpendicular to palm
+  // Also check 3D: thumb tip far from index MCP
+  const thumbSpread = dist(thumbTip, lm[5]) / palm;
+  return Math.abs(proj) / palm > 0.15 || thumbSpread > 0.6;
 }
 
-function classifyGesture(lm,mode) {
+function classifyGesture(lm, mode) {
   if(mode==='numbers') return classifyNumber(lm);
-  if(mode==='words') return classifyWord(lm);
+  if(mode==='words')   return classifyWord(lm);
   return classifyASL(lm);
 }
 
 function classifyASL(lm) {
-  const fs=fingerState(lm);
-  const [thumb,idx,mid,ring,pinky]=fs;
-  const total=fs.reduce((a,b)=>a+b,0);
+  const palm  = getPalmSize(lm);
+  const f     = fingersUp(lm);
+  const thumb = isThumbExtended(lm);
+  const {index, middle, ring, pinky, ci, cm, cr, cp} = f;
 
-  // Pre-compute useful distances
-  const d_tip_thumb_idx = dist(lm[4],lm[8]);    // thumb tip to index tip
-  const d_tip_thumb_mid = dist(lm[4],lm[12]);   // thumb tip to middle tip
-  const d_idx_mid       = dist(lm[8],lm[12]);   // index to middle tip
-  const d_mid_ring      = dist(lm[12],lm[16]);  // middle to ring tip
-  const d_ring_pinky    = dist(lm[16],lm[20]);  // ring to pinky tip
+  const upCount = [index,middle,ring,pinky].filter(Boolean).length;
 
-  // Finger curl values
-  const curl_idx  = curlRatio(lm,1);
-  const curl_mid  = curlRatio(lm,2);
-  const curl_ring = curlRatio(lm,3);
-  const curl_pnk  = curlRatio(lm,4);
+  // Normalized distances
+  const d_thumb_idx  = dist(lm[4], lm[8])  / palm;
+  const d_thumb_mid  = dist(lm[4], lm[12]) / palm;
+  const d_thumb_ring = dist(lm[4], lm[16]) / palm;
+  const d_idx_mid    = dist(lm[8], lm[12]) / palm;
+  const d_mid_ring   = dist(lm[12],lm[16]) / palm;
+  const d_ring_pnk   = dist(lm[16],lm[20]) / palm;
+  const d_idx_tip_mcp = dist(lm[8], lm[5]) / palm; // index tip to its MCP
 
-  // Wrist & knuckle refs
-  const wrist=lm[0], indexMCP=lm[5], midMCP=lm[9];
+  // Wrist & key points
+  const wrist = lm[0];
 
-  let char=null, conf=0;
+  // ── FIVE FINGERS OUT (OPEN / 5) ──────────────────────────────
+  if(thumb && index && middle && ring && pinky)
+    return {char:'OPEN', confidence:0.97};
 
-  // ---- HIGH CONFIDENCE SIGNS ----
-  // B: all 4 fingers up, thumb tucked
-  if(!thumb && idx && mid && ring && pinky && d_idx_mid<0.08)
-    return {char:'B', confidence:0.92};
+  // ── B: 4 fingers straight up, thumb tucked across palm ───────
+  if(!thumb && index && middle && ring && pinky && d_idx_mid < 0.5)
+    return {char:'B', confidence:0.93};
 
-  // V: index & middle up spread, others curled
-  if(!thumb && idx && mid && !ring && !pinky && d_idx_mid>0.07 && curl_ring>0.5)
-    return {char:'V', confidence:0.91};
+  // ── I LOVE YOU: thumb + index + pinky out ────────────────────
+  if(thumb && index && !middle && !ring && pinky)
+    return {char:'ILY', confidence:0.94};
 
-  // U: index & middle up close together
-  if(!thumb && idx && mid && !ring && !pinky && d_idx_mid<0.06)
-    return {char:'U', confidence:0.88};
+  // ── Y: thumb + pinky out, index/middle/ring curled ───────────
+  if(thumb && !index && !middle && !ring && pinky && ci>0.5 && cm>0.5)
+    return {char:'Y', confidence:0.92};
 
-  // L: thumb + index up, others down
-  if(thumb && idx && !mid && !ring && !pinky)
-    return {char:'L', confidence:0.90};
+  // ── L: thumb + index up, others curled ───────────────────────
+  if(thumb && index && !middle && !ring && !pinky && cm>0.5 && cr>0.5)
+    return {char:'L', confidence:0.92};
 
-  // Y: thumb + pinky out, others folded
-  if(thumb && !idx && !mid && !ring && pinky)
-    return {char:'Y', confidence:0.90};
+  // ── K: thumb + index + middle up, spread ─────────────────────
+  if(thumb && index && middle && !ring && !pinky && d_idx_mid > 0.3)
+    return {char:'K', confidence:0.85};
 
-  // I: only pinky up
-  if(!thumb && !idx && !mid && !ring && pinky && curl_idx>0.5)
-    return {char:'I', confidence:0.88};
-
-  // ILY (I love you): thumb + index + pinky
-  if(thumb && idx && !mid && !ring && pinky)
-    return {char:'ILY', confidence:0.91};
-
-  // W: index, middle, ring up; others down
-  if(!thumb && idx && mid && ring && !pinky && d_idx_mid<0.09 && d_mid_ring<0.09)
+  // ── W: index + middle + ring up, spread ──────────────────────
+  if(!thumb && index && middle && ring && !pinky && d_idx_mid < 0.6 && d_mid_ring < 0.6)
     return {char:'W', confidence:0.87};
 
-  // OPEN (5): all fingers up
-  if(total===5 && d_tip_thumb_idx>0.15)
-    return {char:'OPEN', confidence:0.96};
+  // ── V: index + middle up, spread apart, others curled ────────
+  if(!thumb && index && middle && !ring && !pinky && d_idx_mid > 0.35 && cr>0.5)
+    return {char:'V', confidence:0.91};
 
-  // A: closed fist, thumb on side
-  if(total===0 || (thumb && !idx && !mid && !ring && !pinky && curl_idx>0.6))
-    return {char:'A', confidence:0.84};
+  // ── U: index + middle up, close together, others curled ──────
+  if(!thumb && index && middle && !ring && !pinky && d_idx_mid <= 0.35 && cr>0.5)
+    return {char:'U', confidence:0.89};
 
-  // S: fist with thumb over fingers
-  if(!thumb && total<=1 && curl_idx>0.5 && curl_mid>0.5)
-    return {char:'S', confidence:0.80};
+  // ── R: index + middle crossed (index tip to right of middle tip) ──
+  if(!thumb && index && middle && !ring && !pinky && d_idx_mid < 0.2 && lm[8].x < lm[12].x)
+    return {char:'R', confidence:0.82};
 
-  // E: all fingers curled, thumb in
-  if(!thumb && curl_idx>0.6 && curl_mid>0.6 && curl_ring>0.6 && curl_pnk>0.6)
-    return {char:'E', confidence:0.78};
+  // ── I: only pinky up, rest curled ────────────────────────────
+  if(!thumb && !index && !middle && !ring && pinky && ci>0.55 && cm>0.55)
+    return {char:'I', confidence:0.91};
 
-  // C: curved hand (O-like but open at top)
-  if(!idx && !mid && !ring && !pinky && d_tip_thumb_idx>0.1 && d_tip_thumb_idx<0.22)
-    return {char:'C', confidence:0.78};
+  // ─────────────────────────────────────────────────────────────
+  // FIST-BASED SIGNS — distinguish A / S / E / M / N / T
+  // ─────────────────────────────────────────────────────────────
+  if(!index && !middle && !ring && !pinky) {
+    // All fingers down — determine A vs S vs E vs T based on thumb/curl
 
-  // O: tips nearly touching
-  if(d_tip_thumb_idx<0.07 && d_tip_thumb_mid<0.10)
-    return {char:'O', confidence:0.82};
+    // T: thumb tip is between index and middle (tip above index PIP)
+    if(thumb && lm[4].y < lm[6].y && lm[4].x > lm[5].x && lm[4].x < lm[9].x)
+      return {char:'T', confidence:0.82};
 
-  // F: index+thumb touch, others up
-  if(d_tip_thumb_idx<0.05 && mid && ring && pinky)
-    return {char:'F', confidence:0.81};
+    // A: thumb on side, clearly not over fingers, moderate curl
+    if(thumb && ci > 0.45 && ci < 0.85)
+      return {char:'A', confidence:0.84};
 
-  // D: index up, thumb touches middle tip
-  if(idx && !mid && !ring && !pinky && d_tip_thumb_mid<0.07)
-    return {char:'D', confidence:0.79};
+    // S: tight fist, thumb OVER curled fingers (thumb tip near knuckles)
+    if(!thumb && ci > 0.6 && cm > 0.6) {
+      const thumbOverFingers = lm[4].y > lm[6].y; // thumb tip below index PIP
+      if(thumbOverFingers)
+        return {char:'S', confidence:0.83};
+    }
 
-  // G: index pointing sideways (low y diff between tip and MCP)
-  if(idx && !mid && !ring && !pinky && thumb && Math.abs(lm[8].y-lm[5].y)<0.06)
-    return {char:'G', confidence:0.76};
+    // E: all fingers tightly curled, thumb tucked under
+    if(!thumb && ci > 0.7 && cm > 0.7 && cr > 0.7 && cp > 0.7)
+      return {char:'E', confidence:0.80};
 
-  // H: index+middle pointing sideways
-  if(idx && mid && !ring && !pinky && !thumb && Math.abs(lm[8].y-lm[12].y)<0.05)
-    return {char:'H', confidence:0.76};
+    // Default tight fist → A
+    if(ci > 0.5 && cm > 0.5)
+      return {char:'A', confidence:0.75};
+  }
 
-  // K: index + middle up like V but thumb out
-  if(thumb && idx && mid && !ring && !pinky && d_idx_mid>0.05)
-    return {char:'K', confidence:0.77};
+  // M: index + middle + ring curled down OVER thumb (3 fingers over thumb)
+  if(!thumb && index && middle && ring && !pinky) {
+    const thumbBelowFingers = lm[4].y > lm[8].y;
+    if(thumbBelowFingers && d_thumb_idx < 0.5)
+      return {char:'M', confidence:0.80};
+    return {char:'W', confidence:0.78};
+  }
 
-  // M: three fingers folded over thumb
-  if(!thumb && idx && mid && ring && !pinky && lm[4].y>lm[8].y)
-    return {char:'M', confidence:0.75};
+  // N: index + middle curled down over thumb
+  if(!thumb && index && middle && !ring && !pinky) {
+    const thumbBelowFingers = lm[4].y > lm[8].y;
+    if(thumbBelowFingers && d_thumb_idx < 0.45)
+      return {char:'N', confidence:0.80};
+  }
 
-  // N: two fingers folded over thumb
-  if(!thumb && idx && mid && !ring && !pinky && lm[4].y>lm[8].y)
-    return {char:'N', confidence:0.74};
+  // ─────────────────────────────────────────────────────────────
+  // ONE FINGER / THUMB SIGNS
+  // ─────────────────────────────────────────────────────────────
 
-  // P: index pointing down, thumb out
-  if(idx && !mid && !ring && !pinky && thumb && lm[8].y>lm[5].y)
-    return {char:'P', confidence:0.74};
+  // F: thumb and index touch, middle/ring/pinky up
+  if(d_thumb_idx < 0.25 && middle && ring && pinky && !index)
+    return {char:'F', confidence:0.84};
 
-  // Q: index pointing down, no thumb
-  if(idx && !mid && !ring && !pinky && !thumb && lm[8].y>lm[5].y)
-    return {char:'Q', confidence:0.72};
+  // O: all fingertips pinched together into O circle
+  if(d_thumb_idx < 0.3 && d_thumb_mid < 0.35 && ci > 0.3 && cm > 0.3)
+    return {char:'O', confidence:0.85};
 
-  // R: index+middle crossed
-  if(idx && mid && !ring && !pinky && d_idx_mid<0.04 && lm[8].x>lm[12].x)
-    return {char:'R', confidence:0.76};
+  // C: curved C shape — fingers curved, gap between thumb and index
+  if(!thumb && !index && !middle && !ring && !pinky && d_thumb_idx > 0.3 && d_thumb_idx < 0.65)
+    return {char:'C', confidence:0.80};
 
-  // T: thumb between index and middle
-  if(!idx && !mid && !ring && !pinky && thumb && lm[4].y<lm[8].y && lm[4].y>lm[5].y)
-    return {char:'T', confidence:0.74};
+  // D: index up, thumb touches middle (circle with middle), others curled
+  if(index && !middle && !ring && !pinky && d_thumb_mid < 0.3 && cm > 0.4)
+    return {char:'D', confidence:0.82};
 
-  // X: index hooked
-  if(!thumb && curl_idx>0.3 && curl_idx<0.65 && !mid && !ring && !pinky)
-    return {char:'X', confidence:0.72};
+  // G: index + thumb pointing sideways (index tip near same height as MCP)
+  if(thumb && index && !middle && !ring && !pinky) {
+    const sidePoint = Math.abs(lm[8].y - lm[5].y) / palm < 0.3;
+    if(sidePoint) return {char:'G', confidence:0.78};
+    return {char:'L', confidence:0.80}; // fallback to L if pointing up
+  }
 
-  // Z: index pointing, slight z-motion (static approximation like index up)
-  if(idx && !mid && !ring && !pinky && !thumb && lm[8].y<lm[6].y)
-    return {char:'Z', confidence:0.70};
+  // H: index + middle pointing sideways together
+  if(!thumb && index && middle && !ring && !pinky) {
+    const bothSide = Math.abs(lm[8].y - lm[5].y) / palm < 0.25 &&
+                     Math.abs(lm[12].y - lm[9].y) / palm < 0.25;
+    if(bothSide) return {char:'H', confidence:0.78};
+  }
+
+  // P: index pointing DOWN (tip lower than MCP), thumb out
+  if(thumb && index && !middle && !ring && !pinky && lm[8].y > lm[5].y)
+    return {char:'P', confidence:0.78};
+
+  // Q: index + thumb both pointing DOWN
+  if(thumb && !index && !middle && !ring && !pinky && lm[4].y > lm[2].y)
+    return {char:'Q', confidence:0.75};
+
+  // X: index hooked/bent (partially curled, tip below PIP)
+  if(!thumb && !index && !middle && !ring && !pinky && ci > 0.3 && ci < 0.6)
+    return {char:'X', confidence:0.75};
+
+  // Z: index pointing up, tip clearly above DIP (like 1 but with motion — static approximation)
+  if(!thumb && index && !middle && !ring && !pinky && d_idx_tip_mcp > 0.7)
+    return {char:'Z', confidence:0.72};
+
+  // 1/Z fallback: index pointing straight up
+  if(!thumb && index && !middle && !ring && !pinky)
+    return {char:'D', confidence:0.68};
 
   return null;
 }
 
 function classifyNumber(lm) {
-  const fs=fingerState(lm), [thumb,idx,mid,ring,pinky]=fs, total=fs.reduce((a,b)=>a+b,0);
-  const d84=dist(lm[4],lm[8]);
-  if(total===0) return {char:'0',confidence:0.85};
-  if(total===1&&idx) return {char:'1',confidence:0.90};
-  if(idx&&mid&&!ring&&!pinky&&!thumb) return {char:'2',confidence:0.87};
-  if(idx&&mid&&ring&&!pinky&&!thumb) return {char:'3',confidence:0.84};
-  if(idx&&mid&&ring&&pinky&&!thumb) return {char:'4',confidence:0.86};
-  if(total===5) return {char:'5',confidence:0.92};
-  if(thumb&&pinky&&!idx&&!mid&&!ring) return {char:'6',confidence:0.84};
-  if(thumb&&idx&&mid&&!ring&&!pinky) return {char:'7',confidence:0.80};
-  if(thumb&&idx&&mid&&ring&&!pinky) return {char:'8',confidence:0.79};
-  if(!idx&&!mid&&!ring&&!pinky&&thumb) return {char:'9',confidence:0.82};
+  const palm  = getPalmSize(lm);
+  const f     = fingersUp(lm);
+  const thumb = isThumbExtended(lm);
+  const {index, middle, ring, pinky, ci, cm, cr, cp} = f;
+  const upCount = [index,middle,ring,pinky].filter(Boolean).length;
+
+  const d_thumb_idx = dist(lm[4], lm[8])  / palm;
+  const d_thumb_mid = dist(lm[4], lm[12]) / palm;
+
+  // 0: O shape — thumb and index tips form a circle
+  if(d_thumb_idx < 0.3 && ci > 0.3 && cm > 0.3 && !middle && !ring && !pinky)
+    return {char:'0', confidence:0.88};
+
+  // 1: only index up
+  if(!thumb && index && !middle && !ring && !pinky)
+    return {char:'1', confidence:0.93};
+
+  // 2: index + middle up, spread
+  if(!thumb && index && middle && !ring && !pinky)
+    return {char:'2', confidence:0.90};
+
+  // 3: thumb + index + middle up
+  if(thumb && index && middle && !ring && !pinky)
+    return {char:'3', confidence:0.87};
+
+  // 4: all fingers except thumb
+  if(!thumb && index && middle && ring && pinky)
+    return {char:'4', confidence:0.89};
+
+  // 5: all five
+  if(thumb && index && middle && ring && pinky)
+    return {char:'5', confidence:0.95};
+
+  // 6: thumb + pinky touching, others up
+  if(index && middle && ring && !pinky && thumb && d_thumb_idx > 0.4)
+    return {char:'6', confidence:0.82};
+
+  // 7: index + middle out, thumb + pinky touching
+  if(index && middle && !ring && !pinky && thumb)
+    return {char:'7', confidence:0.80};
+
+  // 8: index out, thumb + middle touching
+  if(index && !middle && !ring && !pinky && thumb && d_thumb_mid < 0.3)
+    return {char:'8', confidence:0.79};
+
+  // 9: index + thumb circle (like F shape)
+  if(d_thumb_idx < 0.25 && !index && middle && ring && pinky)
+    return {char:'9', confidence:0.82};
+
   return null;
 }
 
 function classifyWord(lm) {
-  const fs=fingerState(lm), [thumb,idx,mid,ring,pinky]=fs, total=fs.reduce((a,b)=>a+b,0);
-  const d84=dist(lm[4],lm[8]);
-  if(total===5) return {char:'HELLO',confidence:0.90};
-  if(thumb&&idx&&!mid&&!ring&&pinky) return {char:'I LOVE YOU',confidence:0.93};
-  if(total===0) return {char:'NO',confidence:0.85};
-  if(!idx&&!mid&&!ring&&!pinky&&thumb) return {char:'YES',confidence:0.87};
-  if(thumb&&idx&&!mid&&!ring&&!pinky&&d84<0.06) return {char:'OK',confidence:0.86};
-  if(!thumb&&idx&&mid&&ring&&!pinky) return {char:'THANK YOU',confidence:0.82};
-  if(!thumb&&idx&&!mid&&!ring&&!pinky) return {char:'GOOD',confidence:0.80};
-  if(thumb&&pinky&&!idx&&!mid&&!ring) return {char:'CALL ME',confidence:0.86};
-  if(!thumb&&!idx&&!mid&&!ring&&pinky) return {char:'WAIT',confidence:0.79};
+  const palm  = getPalmSize(lm);
+  const f     = fingersUp(lm);
+  const thumb = isThumbExtended(lm);
+  const {index, middle, ring, pinky, ci, cm, cr, cp} = f;
+  const upCount = [index,middle,ring,pinky].filter(Boolean).length;
+  const d_thumb_idx = dist(lm[4], lm[8]) / palm;
+
+  // HELLO: all 5 fingers spread open (wave)
+  if(thumb && index && middle && ring && pinky)
+    return {char:'HELLO', confidence:0.92};
+
+  // I LOVE YOU: thumb + index + pinky
+  if(thumb && index && !middle && !ring && pinky)
+    return {char:'I LOVE YOU', confidence:0.95};
+
+  // YES: closed fist (nod gesture, static = fist)
+  if(!thumb && !index && !middle && !ring && !pinky && ci>0.6)
+    return {char:'YES', confidence:0.85};
+
+  // NO: index + middle snapping (static = 2 fingers out)
+  if(!thumb && index && middle && !ring && !pinky)
+    return {char:'NO', confidence:0.83};
+
+  // OK: thumb + index circle
+  if(thumb && !index && middle && ring && pinky && d_thumb_idx < 0.3)
+    return {char:'OK', confidence:0.88};
+
+  // THANK YOU: flat hand forward (all fingers together, palm out)
+  if(!thumb && index && middle && ring && !pinky && cm < 0.25)
+    return {char:'THANK YOU', confidence:0.80};
+
+  // GOOD: index only, pointing up (simplified)
+  if(!thumb && index && !middle && !ring && !pinky)
+    return {char:'GOOD', confidence:0.78};
+
+  // CALL ME: thumb + pinky out (shaka)
+  if(thumb && !index && !middle && !ring && pinky)
+    return {char:'CALL ME', confidence:0.88};
+
+  // WAIT: pinky only
+  if(!thumb && !index && !middle && !ring && pinky)
+    return {char:'WAIT', confidence:0.80};
+
+  // SORRY: fist (all curled) — same as YES but different context
+  if(!thumb && !index && !middle && !ring && !pinky && ci>0.5)
+    return {char:'SORRY', confidence:0.75};
+
   return null;
 }
+
 
 // =====================================================================
 // GESTURE PIPELINE — MULTI-FRAME SMOOTHING
