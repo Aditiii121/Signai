@@ -19,6 +19,11 @@ CORS(app)
 def index():
     return send_from_directory('.', 'index.html')
 
+@app.route('/companion')
+def companion():
+    """Serve the companion popup — same page, compact mode applied by JS."""
+    return send_from_directory('.', 'index.html')
+
 # ─── AI Interpretation Endpoint ───────────────────────────────────────────────
 @app.route('/interpret', methods=['POST'])
 def interpret():

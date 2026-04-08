@@ -325,6 +325,246 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
 /* CAPTIONS OVERLAY */
 .caption-bar{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.88);border:1px solid rgba(74,144,255,0.3);border-radius:12px;padding:10px 24px;font-size:1.1rem;color:#fff;max-width:80%;text-align:center;z-index:200;backdrop-filter:blur(10px);display:none;animation:toastIn 0.3s ease}
 .caption-bar.show{display:block}
+
+/* ========================= MEETING COMPANION STYLES ========================= */
+.companion-accent{color:#10b981}
+.companion-card{background:rgba(11,11,18,0.92);border:1px solid rgba(16,185,129,0.15);border-radius:16px;overflow:hidden;backdrop-filter:blur(12px);transition:border-color 0.3s,box-shadow 0.3s}
+.companion-card:hover{border-color:rgba(16,185,129,0.28);box-shadow:0 0 40px rgba(16,185,129,0.05)}
+.companion-card-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid rgba(16,185,129,0.1)}
+.companion-card-label{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;font-weight:700;color:#10b981;letter-spacing:0.1em;text-transform:uppercase;opacity:0.8}
+.companion-icon-box{width:26px;height:26px;border-radius:7px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;font-size:13px}
+.mode-tab.active-m3-new{border-color:rgba(16,185,129,0.5);background:rgba(16,185,129,0.06);box-shadow:0 0 30px rgba(16,185,129,0.08)}
+.mode-tab.active-m3-new .mode-tab-name{color:#10b981}
+.btn-companion{border-color:rgba(16,185,129,0.3);color:#10b981}
+.btn-companion:hover{background:rgba(16,185,129,0.09)}
+.btn-companion.on{background:rgba(16,185,129,0.08)}
+
+/* Platform tabs */
+.platform-tabs{display:flex;gap:6px;padding:12px 16px;flex-wrap:wrap}
+.platform-tab{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:0.82rem;font-family:'Syne',sans-serif;cursor:pointer;transition:all 0.2s;font-weight:500}
+.platform-tab:hover{border-color:rgba(16,185,129,0.3);color:#10b981}
+.platform-tab.active{border-color:rgba(16,185,129,0.5);background:rgba(16,185,129,0.08);color:#10b981;font-weight:700}
+.platform-tab .p-icon{font-size:1.1rem}
+.guide-content{padding:14px 18px;font-size:0.85rem;color:var(--text2);line-height:1.8}
+.guide-content h4{color:var(--text);font-size:1rem;margin-bottom:10px}
+.guide-content ol{padding-left:20px;margin:10px 0}
+.guide-content li{margin-bottom:8px}
+.guide-content .tip{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:8px;padding:10px 14px;margin-top:12px;font-size:0.8rem;color:#10b981}
+
+/* Meeting link input */
+.meeting-link-area{padding:14px 18px}
+.meeting-link-input{width:100%;background:var(--bg2);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px 16px;font-family:'Syne',sans-serif;font-size:0.95rem;color:var(--text);outline:none;transition:border-color 0.3s}
+.meeting-link-input:focus{border-color:rgba(16,185,129,0.5);box-shadow:0 0 16px rgba(16,185,129,0.06)}
+.meeting-link-input::placeholder{color:var(--text3)}
+
+/* Companion tools */
+.companion-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px}
+.companion-tool-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:16px 8px;cursor:pointer;transition:all 0.2s;color:var(--text2);font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:500;text-align:center}
+.companion-tool-btn:hover{border-color:rgba(16,185,129,0.3);color:#10b981;transform:translateY(-2px)}
+.companion-tool-btn .tool-icon{font-size:1.6rem}
+.companion-tool-btn .tool-label{font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--text3)}
+
+/* Compact mode */
+.compact-mode .wrap{max-width:480px;padding:0 10px}
+.compact-mode header{padding:4px 0}
+.compact-mode .header-inner{padding:6px 10px}
+.compact-mode .mode-switcher{display:none}
+.compact-mode .right-col{display:none}
+.compact-mode .card-head{padding:8px 12px}
+.compact-mode .cam-wrap{aspect-ratio:4/3}
+.compact-mode .controls-bar{padding:8px 10px}
+.compact-mode .output-area{padding:10px 12px}
+.compact-mode .stats-row{display:none}
+
+/* Onboarding */
+.onboarding-overlay{position:fixed;inset:0;background:rgba(5,5,10,0.95);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px);opacity:0;visibility:hidden;transition:all 0.4s}
+.onboarding-overlay.show{opacity:1;visibility:visible}
+.onboarding-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px 32px;max-width:480px;width:90%;max-height:80vh;overflow-y:auto;text-align:center}
+.onboarding-box h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--accent);margin-bottom:6px;letter-spacing:0.06em}
+.onboarding-box .onb-sub{font-size:0.85rem;color:var(--text2);margin-bottom:24px;line-height:1.6}
+.onb-step{display:flex;align-items:flex-start;gap:12px;text-align:left;padding:12px 0;border-bottom:1px solid var(--border2)}
+.onb-step:last-child{border-bottom:none}
+.onb-num{width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--accent);flex-shrink:0}
+.onb-text{font-size:0.85rem;color:var(--text2);line-height:1.6}
+.onb-text strong{color:var(--text)}
+
+/* ========================= RESPONSIVE BREAKPOINTS ========================= */
+
+/* Hamburger for mobile */
+.mobile-menu-btn{display:none;background:none;border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text2);font-size:1.2rem;cursor:pointer}
+
+@media(max-width:1024px){
+  .layout{grid-template-columns:1fr}
+  .m2-panel-layout{grid-template-columns:1fr}
+  .m3-layout{grid-template-columns:1fr}
+  .companion-tools{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:768px){
+  body{font-size:15px}
+
+  /* Header compact */
+  .header-inner{padding:8px 12px;gap:8px}
+  .logo-name{font-size:1.3rem}
+  .logo-mark{width:32px;height:32px;font-size:16px}
+  .logo-tag{font-size:0.55rem;padding:1px 5px}
+  .header-pills{display:none}
+  .mobile-menu-btn{display:flex}
+  .theme-switcher{margin-left:8px !important}
+
+  /* Mode switcher — horizontal scroll or compact */
+  .mode-switcher{flex-direction:column;gap:8px;padding:16px 0 12px}
+  .mode-divider{display:none}
+  .mode-tab{min-width:unset;width:100%;padding:12px 16px;flex-direction:row;gap:12px}
+  .mode-tab-icon{font-size:1.5rem}
+  .mode-tab-name{font-size:0.88rem}
+  .mode-tab-desc{display:none}
+
+  /* Layout */
+  .wrap{padding:0 12px}
+  .layout{gap:12px;padding-bottom:40px}
+  .left-col{gap:12px}
+  .right-col{gap:10px}
+
+  /* Camera */
+  .cam-wrap{aspect-ratio:4/3}
+  .card-head{padding:10px 12px;flex-wrap:wrap;gap:8px}
+  .mode-group{margin-left:0;width:100%;justify-content:stretch}
+  .mode-btn{flex:1;text-align:center;padding:8px 6px;font-size:0.7rem}
+
+  /* Controls */
+  .controls-bar{padding:10px 12px;gap:6px}
+  .btn{min-height:44px;padding:10px 14px;font-size:0.82rem;border-radius:10px}
+  .btn-primary{min-height:48px;font-size:0.88rem}
+
+  /* Output */
+  .output-area{padding:12px 14px}
+  .output-box{font-size:1.2rem;padding:12px 14px;min-height:70px}
+
+  /* Stats */
+  .stats-row{grid-template-columns:repeat(2,1fr);padding:10px 12px}
+  .stat-num{font-size:1.5rem}
+
+  /* Alpha grid */
+  .alpha-grid{grid-template-columns:repeat(4,1fr);gap:4px;padding:8px 10px}
+
+  /* History */
+  .hist-list{max-height:160px;padding:8px 10px}
+
+  /* TTS */
+  .tts-section{padding:10px 12px}
+
+  /* Quick phrases */
+  .quick-phrases{padding:10px 12px;gap:5px}
+  .qp-btn{padding:10px 14px;font-size:0.82rem;min-height:44px}
+
+  /* Meeting phrases */
+  .meeting-phrases{padding:10px 12px;gap:5px}
+  .mp-btn{padding:10px 14px;font-size:0.82rem;min-height:44px}
+
+  /* Emergency */
+  .emergency-grid{grid-template-columns:1fr;gap:6px;padding:10px 12px}
+  .emergency-btn{padding:16px 12px;font-size:0.92rem;min-height:52px}
+
+  /* Mode 2 */
+  .m2-panel-layout{gap:12px}
+  .type-input{min-height:80px;font-size:1rem;padding:12px}
+  .sign-char-chip{padding:10px 8px;min-width:48px}
+  .chip-letter{font-size:1.5rem}
+
+  /* Mode 3 */
+  .m3-layout{gap:12px}
+  .zoom-input,.meeting-link-input{padding:14px;font-size:1rem;min-height:48px}
+  .convo-board{max-height:260px;padding:8px 10px}
+
+  /* Companion */
+  .companion-tools{grid-template-columns:repeat(2,1fr)}
+  .companion-tool-btn{padding:14px 8px}
+
+  /* Readout bar */
+  .readout-bar{padding:10px 14px;gap:10px;flex-wrap:wrap}
+  .readout-text{font-size:0.95rem}
+
+  /* Toast */
+  #toastWrap{bottom:12px;right:12px;left:12px;align-items:stretch}
+  .toast{max-width:100%}
+
+  /* Gesture display */
+  .gesture-display{font-size:2rem;padding:4px 18px;bottom:12px}
+
+  /* HUD badges */
+  .hud-badge{font-size:0.6rem;padding:3px 8px}
+
+  /* Slider improvements for touch */
+  input[type=range]{height:6px}
+  input[type=range]::-webkit-slider-thumb{width:22px;height:22px}
+
+  /* Onboarding */
+  .onboarding-box{padding:24px 20px}
+  .onboarding-box h2{font-size:1.6rem}
+
+  /* Platform tabs */
+  .platform-tabs{gap:4px}
+  .platform-tab{padding:10px 12px;font-size:0.8rem;flex:1;justify-content:center;min-height:44px}
+}
+
+@media(max-width:480px){
+  body{font-size:14px}
+
+  .header-inner{padding:6px 10px}
+  .logo-name{font-size:1.1rem}
+  .logo-mark{width:28px;height:28px;font-size:14px;border-radius:8px}
+  .logo-tag{display:none}
+  .theme-switcher .theme-btn{padding:3px 7px;font-size:0.65rem}
+
+  .mode-tab{padding:10px 12px}
+  .mode-tab-icon{font-size:1.2rem}
+  .mode-tab-name{font-size:0.8rem}
+
+  .cam-wrap{aspect-ratio:1/1}
+  .card{border-radius:12px}
+  .card-head{padding:8px 10px}
+  .card-label{font-size:0.62rem}
+
+  .controls-bar{flex-wrap:wrap}
+  .btn{font-size:0.78rem;padding:10px 12px}
+
+  .output-box{font-size:1rem;min-height:60px}
+
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:6px;padding:8px 10px}
+  .stat{padding:8px}
+  .stat-num{font-size:1.3rem}
+  .stat-key{font-size:0.5rem}
+
+  .alpha-grid{grid-template-columns:repeat(4,1fr);gap:3px;padding:6px 8px}
+  .alpha-cell{border-radius:6px}
+  .alpha-lbl{font-size:0.6rem}
+
+  .gesture-display{font-size:1.6rem;padding:3px 14px;border-radius:8px}
+
+  .sign-phrase-text{font-size:1.1rem}
+  .sign-detail-header{font-size:1.8rem}
+
+  .companion-tools{grid-template-columns:1fr 1fr}
+  .emergency-grid{grid-template-columns:1fr}
+
+  .convo-bubble{max-width:85%;font-size:0.82rem}
+  .caption-bar{padding:8px 16px;font-size:0.95rem;max-width:95%;border-radius:8px;bottom:60px}
+}
+
+/* Landscape mobile */
+@media(max-height:500px) and (orientation:landscape){
+  .mode-switcher{flex-direction:row;padding:8px 0}
+  .mode-tab{padding:8px 12px}
+  .cam-wrap{aspect-ratio:16/9;max-height:50vh}
+}
+
+/* Print styles */
+@media print{
+  .orb,.grid-bg,header,.mode-switcher,.controls-bar,.btn,.toast,#toastWrap{display:none !important}
+  body{background:#fff;color:#000}
+  .card{border:1px solid #ccc;box-shadow:none}
+}
 </style>
 </head>
 <body>
@@ -352,6 +592,7 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
       <div class="pill"><div class="dot" style="background:var(--accent2)"></div><span id="fpsLabel">0 FPS</span></div>
       <div class="pill"><div class="dot" id="confDot"></div><span id="confGlobal">—% conf</span></div>
     </div>
+    <button class="mobile-menu-btn" onclick="toggleMobileStatus()" title="Status">📊</button>
   </div>
 </header>
 
@@ -372,9 +613,9 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
     </div>
     <div class="mode-divider">⇄</div>
     <div class="mode-tab" id="tabM3" onclick="switchMode(3)">
-      <div class="mode-tab-icon">💼</div>
-      <div class="mode-tab-name">Mode 3 — Zoom Meeting</div>
-      <div class="mode-tab-desc">Join Zoom meetings with live sign language<br>captions · Perfect for office communication</div>
+      <div class="mode-tab-icon">🎥</div>
+      <div class="mode-tab-name">Mode 3 — Meeting Companion</div>
+      <div class="mode-tab-desc">Use SignAI alongside Zoom, Meet, Teams<br>Real-time sign language bridge for any meeting</div>
     </div>
   </div>
 
@@ -588,6 +829,8 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
             <button class="qp-btn" onclick="usePhrase('Nice to meet you')">Nice to meet you</button>
             <button class="qp-btn" onclick="usePhrase('Please')">Please</button>
             <button class="qp-btn" onclick="usePhrase('Sorry')">Sorry</button>
+            <button class="qp-btn" onclick="usePhrase('Good morning')">Good morning</button>
+            <button class="qp-btn" onclick="usePhrase('Goodbye')">Goodbye</button>
           </div>
         </div>
       </div>
@@ -645,54 +888,107 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
     </div>
   </div>
 
-  <!-- ======================== MODE 3 PANEL — ZOOM MEETING ======================== -->
+  <!-- ======================== MODE 3 PANEL — MEETING COMPANION ======================== -->
   <div class="panel" id="panelM3">
     <div class="m3-layout">
-      <!-- LEFT: Meeting Area -->
+      <!-- LEFT: Meeting Companion Tools -->
       <div>
-        <div class="m3-card" style="margin-bottom:18px">
-          <div class="m3-card-head">
-            <div class="m3-card-label"><div class="m3-icon-box">📹</div>Zoom Meeting</div>
-            <span id="zoomStatus" style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text3)">Not Connected</span>
+        <!-- JOIN MEETING -->
+        <div class="companion-card" style="margin-bottom:18px">
+          <div class="companion-card-head">
+            <div class="companion-card-label"><div class="companion-icon-box">🔗</div>Join Your Meeting</div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text3)">Any platform</span>
           </div>
-          <div class="zoom-join-form" id="zoomJoinForm">
-            <input class="zoom-input" id="zoomMeetingId" placeholder="Meeting ID (e.g. 123-456-7890)" type="text">
-            <input class="zoom-input" id="zoomPasscode" placeholder="Passcode (optional)" type="password">
-            <input class="zoom-input" id="zoomDisplayName" placeholder="Your Display Name" type="text" value="SignAI User">
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn btn-zoom" onclick="joinZoomMeeting()" style="flex:1">📹 Join Meeting</button>
-              <button class="btn btn-zoom" onclick="startDemoMeeting()" style="flex:1">🎮 Demo Mode</button>
+          <div class="meeting-link-area">
+            <input class="meeting-link-input" id="meetingLinkInput" placeholder="Paste your Zoom, Google Meet, or Teams meeting link..." type="url">
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="btn btn-companion" onclick="openMeetingLink()" style="flex:1" id="openMeetingBtn">🔗 Open Meeting in New Tab</button>
+              <button class="btn btn-companion" onclick="startCompanionMode()" style="flex:1">🎥 Start Companion Mode</button>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text3);margin-top:8px;line-height:1.5;text-align:center">
+              Your meeting opens in a new tab · SignAI stays here as your communication bridge
             </div>
           </div>
-          <div class="zoom-meeting-area" id="zoomMeetingArea" style="display:none">
-            <div style="width:100%;height:100%;min-height:320px;background:linear-gradient(135deg,#0a0a1a,#0d1526);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;position:relative">
-              <div style="font-size:3rem">📹</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#4a90ff;letter-spacing:0.06em" id="zoomParticipantName">Meeting in Progress</div>
-              <div class="zoom-status" id="zoomStatusText">SignAI is translating your signs in real-time</div>
-              <div style="position:absolute;bottom:12px;left:12px;right:12px;display:flex;gap:8px;justify-content:center">
-                <button class="btn btn-zoom on" onclick="toggleZoomCamera()">📷 Camera</button>
-                <button class="btn btn-zoom" onclick="toggleZoomCaptions()">💬 Captions</button>
-                <button class="btn btn-danger" onclick="leaveZoomMeeting()">📴 Leave</button>
-              </div>
-            </div>
+        </div>
+
+        <!-- COMPANION TOOLS -->
+        <div class="companion-card" style="margin-bottom:18px">
+          <div class="companion-card-head">
+            <div class="companion-card-label"><div class="companion-icon-box">🛠️</div>Companion Tools</div>
+          </div>
+          <div class="companion-tools">
+            <button class="companion-tool-btn" onclick="launchPiP()">
+              <div class="tool-icon">📌</div>
+              <div>Picture-in-Picture</div>
+              <div class="tool-label">Float camera</div>
+            </button>
+            <button class="companion-tool-btn" onclick="launchCompanionPopup()">
+              <div class="tool-icon">🪟</div>
+              <div>Pop-Out Window</div>
+              <div class="tool-label">Mini overlay</div>
+            </button>
+            <button class="companion-tool-btn" onclick="toggleCompactMode()">
+              <div class="tool-icon">📐</div>
+              <div>Compact Mode</div>
+              <div class="tool-label">Minimal UI</div>
+            </button>
+            <button class="companion-tool-btn" onclick="startCamera()">
+              <div class="tool-icon">📷</div>
+              <div>Start Camera</div>
+              <div class="tool-label">Sign detection</div>
+            </button>
+            <button class="companion-tool-btn" onclick="toggleMeetingSTT()">
+              <div class="tool-icon">🎤</div>
+              <div>Listen to Speaker</div>
+              <div class="tool-label">Speech-to-text</div>
+            </button>
+            <button class="companion-tool-btn" onclick="showOnboarding()">
+              <div class="tool-icon">📖</div>
+              <div>Setup Guide</div>
+              <div class="tool-label">How to use</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- PLATFORM SETUP GUIDES -->
+        <div class="companion-card" style="margin-bottom:18px">
+          <div class="companion-card-head">
+            <div class="companion-card-label"><div class="companion-icon-box">📖</div>Platform Setup Guide</div>
+          </div>
+          <div class="platform-tabs" id="platformTabs">
+            <button class="platform-tab active" onclick="showGuide('zoom')"><span class="p-icon">📹</span> Zoom</button>
+            <button class="platform-tab" onclick="showGuide('meet')"><span class="p-icon">🟢</span> Google Meet</button>
+            <button class="platform-tab" onclick="showGuide('teams')"><span class="p-icon">🟣</span> Teams</button>
+            <button class="platform-tab" onclick="showGuide('other')"><span class="p-icon">🌐</span> Other</button>
+          </div>
+          <div class="guide-content" id="guideContent">
+            <h4>📹 Using SignAI with Zoom</h4>
+            <ol>
+              <li><strong>Open your Zoom meeting</strong> — click "Open Meeting in New Tab" above after pasting the link, or open Zoom separately</li>
+              <li><strong>Position your windows</strong> — put Zoom on one half of the screen and SignAI on the other (use Split Screen on mobile)</li>
+              <li><strong>Start SignAI camera</strong> — click "Start Camera" in the tools above. SignAI will detect your signs in real-time</li>
+              <li><strong>Sign naturally</strong> — the detected text appears in the output box. Use "Speak All" to speak the text aloud through your microphone</li>
+              <li><strong>Use Quick Phrases</strong> — tap meeting phrases below for instant spoken responses</li>
+            </ol>
+            <div class="tip">💡 <strong>Pro Tip:</strong> Use Picture-in-Picture mode to float your SignAI camera over the Zoom window. On mobile, use Split Screen view.</div>
           </div>
         </div>
 
         <!-- LIVE CAPTIONS -->
-        <div class="m3-card" style="margin-bottom:18px">
-          <div class="m3-card-head">
-            <div class="m3-card-label"><div class="m3-icon-box">💬</div>Live Captions</div>
+        <div class="companion-card" style="margin-bottom:18px">
+          <div class="companion-card-head">
+            <div class="companion-card-label"><div class="companion-icon-box">💬</div>Live Captions</div>
             <button class="btn" style="padding:3px 9px;font-size:0.68rem" onclick="clearCaptions()">Clear</button>
           </div>
           <div class="convo-board" id="captionBoard">
-            <div class="convo-empty">Captions will appear here during the meeting…</div>
+            <div class="convo-empty">Start a meeting session to see captions here…</div>
           </div>
         </div>
 
         <!-- MEETING QUICK PHRASES -->
-        <div class="m3-card">
-          <div class="m3-card-head">
-            <div class="m3-card-label"><div class="m3-icon-box">⚡</div>Meeting Phrases</div>
+        <div class="companion-card">
+          <div class="companion-card-head">
+            <div class="companion-card-label"><div class="companion-icon-box">⚡</div>Meeting Phrases</div>
           </div>
           <div class="meeting-phrases">
             <button class="mp-btn" onclick="sendMeetingPhrase('I agree')">👍 I agree</button>
@@ -704,32 +1000,34 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
             <button class="mp-btn" onclick="sendMeetingPhrase('I need clarification')">🔍 Clarify</button>
             <button class="mp-btn" onclick="sendMeetingPhrase('Thank you')">🙏 Thanks</button>
             <button class="mp-btn" onclick="sendMeetingPhrase('Good idea')">💡 Good idea</button>
-            <button class="mp-btn" onclick="sendMeetingPhrase('Let\'s move on')">➡️ Move on</button>
+            <button class="mp-btn" onclick="sendMeetingPhrase('Let&#39;s move on')">➡️ Move on</button>
+            <button class="mp-btn" onclick="sendMeetingPhrase('Hello everyone')">👋 Hello</button>
+            <button class="mp-btn" onclick="sendMeetingPhrase('Goodbye, thank you')">👋 Goodbye</button>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT: Conversation & Tools -->
+      <!-- RIGHT: Conversation & Emergency -->
       <div>
         <!-- CONVERSATION BOARD -->
-        <div class="m3-card" style="margin-bottom:14px">
-          <div class="m3-card-head">
-            <div class="m3-card-label"><div class="m3-icon-box">💬</div>Conversation</div>
+        <div class="companion-card" style="margin-bottom:14px">
+          <div class="companion-card-head">
+            <div class="companion-card-label"><div class="companion-icon-box">💬</div>Conversation</div>
             <button class="btn" style="padding:3px 9px;font-size:0.68rem" onclick="clearConvo()">Clear</button>
           </div>
           <div class="convo-board" id="convoBoard">
-            <div class="convo-empty">Start a meeting to see the conversation…</div>
+            <div class="convo-empty">Start companion mode to see the conversation…</div>
           </div>
           <div style="padding:10px 14px;display:flex;gap:6px">
-            <input class="zoom-input" id="convoInput" placeholder="Type a message…" style="font-size:0.85rem;padding:8px 12px" onkeydown="if(event.key==='Enter')sendConvoMsg()">
-            <button class="btn btn-zoom" onclick="sendConvoMsg()">Send</button>
+            <input class="meeting-link-input" id="convoInput" placeholder="Type a message…" style="font-size:0.85rem;padding:10px 12px" onkeydown="if(event.key==='Enter')sendConvoMsg()">
+            <button class="btn btn-companion" onclick="sendConvoMsg()">Send</button>
           </div>
         </div>
 
         <!-- EMERGENCY PHRASES -->
-        <div class="m3-card" style="margin-bottom:14px">
-          <div class="m3-card-head">
-            <div class="m3-card-label" style="color:var(--accent3)"><div class="m3-icon-box" style="background:rgba(255,77,109,0.1);border-color:rgba(255,77,109,0.2)">🚨</div>Emergency Phrases</div>
+        <div class="companion-card" style="margin-bottom:14px">
+          <div class="companion-card-head">
+            <div class="companion-card-label" style="color:var(--accent3)"><div class="companion-icon-box" style="background:rgba(255,77,109,0.1);border-color:rgba(255,77,109,0.2)">🚨</div>Emergency Phrases</div>
           </div>
           <div class="emergency-grid">
             <button class="emergency-btn" onclick="sendEmergency('I need help!')">🆘 Need Help</button>
@@ -742,18 +1040,19 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
         </div>
 
         <!-- KEYBOARD SHORTCUTS -->
-        <div class="m3-card">
-          <div class="m3-card-head">
-            <div class="m3-card-label"><div class="m3-icon-box">⌨️</div>Keyboard Shortcuts</div>
+        <div class="companion-card">
+          <div class="companion-card-head">
+            <div class="companion-card-label"><div class="companion-icon-box">⌨️</div>Keyboard Shortcuts</div>
           </div>
           <div style="padding:12px 16px;display:flex;flex-direction:column;gap:6px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text2)">
             <div><span class="kbd">1</span> Mode 1 · Sign→Text</div>
             <div><span class="kbd">2</span> Mode 2 · Voice→Sign</div>
-            <div><span class="kbd">3</span> Mode 3 · Zoom Meeting</div>
+            <div><span class="kbd">3</span> Mode 3 · Meeting Companion</div>
             <div><span class="kbd">Space</span> Add space to output</div>
             <div><span class="kbd">Esc</span> Stop camera / Leave meeting</div>
             <div><span class="kbd">S</span> Speak output text</div>
             <div><span class="kbd">C</span> Start/Stop camera</div>
+            <div><span class="kbd">P</span> Picture-in-Picture</div>
           </div>
         </div>
       </div>
@@ -761,6 +1060,31 @@ select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:va
   </div>
 
 </div><!-- /wrap -->
+
+<!-- Onboarding Overlay -->
+<div class="onboarding-overlay" id="onboardingOverlay">
+  <div class="onboarding-box">
+    <h2>👋 Welcome to SignAI</h2>
+    <div class="onb-sub">Your real-time sign language communication bridge for online meetings and everyday conversations.</div>
+    <div class="onb-step">
+      <div class="onb-num">1</div>
+      <div class="onb-text"><strong>Choose Your Mode</strong> — Sign→Text for camera detection, Voice→Sign for learning signs, or Meeting Companion for online calls.</div>
+    </div>
+    <div class="onb-step">
+      <div class="onb-num">2</div>
+      <div class="onb-text"><strong>Start Your Camera</strong> — Allow camera access. SignAI runs 100% in your browser — no data leaves your device.</div>
+    </div>
+    <div class="onb-step">
+      <div class="onb-num">3</div>
+      <div class="onb-text"><strong>Join Your Meeting</strong> — Paste any Zoom, Google Meet, or Teams link. The meeting opens in a new tab while SignAI stays as your companion.</div>
+    </div>
+    <div class="onb-step">
+      <div class="onb-num">4</div>
+      <div class="onb-text"><strong>Communicate Freely</strong> — Sign naturally. Your signs become text and voice. Use Quick Phrases for instant responses.</div>
+    </div>
+    <button class="btn btn-primary" onclick="hideOnboarding()" style="margin-top:20px;width:100%;justify-content:center;font-size:1rem">✨ Get Started</button>
+  </div>
+</div>
 
 <!-- Captions Overlay -->
 <div class="caption-bar" id="captionOverlay"></div>
@@ -798,8 +1122,8 @@ function switchMode(m) {
   document.getElementById('panelM3').classList.toggle('active', m===3);
   document.getElementById('tabM1').className = 'mode-tab' + (m===1?' active-m1':'');
   document.getElementById('tabM2').className = 'mode-tab' + (m===2?' active-m2':'');
-  document.getElementById('tabM3').className = 'mode-tab' + (m===3?' active-m3':'');
-  const labels = {1:'🤟 Mode 1: Sign → Text', 2:'🗣️ Mode 2: Voice/Text → Sign Guide', 3:'💼 Mode 3: Zoom Meeting'};
+  document.getElementById('tabM3').className = 'mode-tab' + (m===3?' active-m3-new':'');
+  const labels = {1:'🤟 Mode 1: Sign → Text', 2:'🗣️ Mode 2: Voice/Text → Sign Guide', 3:'🎥 Mode 3: Meeting Companion'};
   toast(labels[m]);
 }
 
@@ -1717,67 +2041,180 @@ function toast(msg,type='info') {
 }
 
 // =====================================================================
-// MODE 3 — ZOOM MEETING
+// MODE 3 — MEETING COMPANION
 // =====================================================================
-let zoomConnected = false, zoomCaptionsOn = false, zoomDemoInterval = null;
+let companionActive = false, meetingSTTActive = false, meetingRecognition = null;
+let zoomConnected = false, zoomCaptionsOn = true, zoomDemoInterval = null;
 
-function joinZoomMeeting() {
-  const id = document.getElementById('zoomMeetingId').value.trim();
-  if(!id){toast('⚠️ Enter a Meeting ID','warn');return;}
-  toast('📹 Connecting to Zoom meeting…');
-  document.getElementById('zoomStatus').textContent='Connecting...';
-  setTimeout(()=>{
-    // In real implementation, this would use Zoom Web SDK
-    // For now, start in demo-like mode with the entered details
-    activateZoomMeeting('Meeting: '+id);
-    toast('📹 Connected! SignAI is active — sign language will be translated in real-time');
-  },1500);
+function openMeetingLink() {
+  const link = document.getElementById('meetingLinkInput').value.trim();
+  if(!link) { toast('⚠️ Paste a meeting link first','warn'); return; }
+  // Validate URL
+  try { new URL(link); } catch(e) { toast('⚠️ Invalid URL — paste a full meeting link','warn'); return; }
+  window.open(link, '_blank');
+  toast('🔗 Meeting opened in new tab — SignAI stays here as your companion');
+  startCompanionMode();
 }
 
-function startDemoMeeting() {
-  toast('🎮 Starting demo meeting…');
-  setTimeout(()=>activateZoomMeeting('Demo Meeting'),800);
-}
-
-function activateZoomMeeting(title) {
+function startCompanionMode() {
+  companionActive = true;
   zoomConnected = true;
-  document.getElementById('zoomJoinForm').style.display='none';
-  document.getElementById('zoomMeetingArea').style.display='block';
-  document.getElementById('zoomParticipantName').textContent=title;
-  document.getElementById('zoomStatus').textContent='Connected';
-  document.getElementById('zoomStatus').style.color='#00ffa3';
-  // Start simulating captions in demo mode
-  startDemoCaptions();
+  if(!cameraStream) startCamera();
+  toast('🎥 Companion Mode active — sign language detection is running!');
 }
 
-function leaveZoomMeeting() {
-  zoomConnected = false;
-  clearInterval(zoomDemoInterval);
-  document.getElementById('zoomJoinForm').style.display='flex';
-  document.getElementById('zoomMeetingArea').style.display='none';
-  document.getElementById('zoomStatus').textContent='Not Connected';
-  document.getElementById('zoomStatus').style.color='';
-  document.getElementById('captionOverlay').classList.remove('show');
-  toast('📴 Left the meeting');
+async function launchPiP() {
+  const vid = document.getElementById('videoEl');
+  if(!vid.srcObject) { toast('⚠️ Start the camera first','warn'); return; }
+  try {
+    if(document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+      toast('📌 Picture-in-Picture closed');
+    } else {
+      await vid.requestPictureInPicture();
+      toast('📌 Camera floating! Move/resize the PiP window');
+    }
+  } catch(e) { toast('⚠️ PiP not supported in this browser','warn'); }
 }
 
-function toggleZoomCamera() {
-  if(!cameraStream) startCamera(); else stopCamera();
+function launchCompanionPopup() {
+  const w = 420, h = 600;
+  const left = screen.width - w - 20;
+  const top = 60;
+  const popup = window.open(window.location.href, 'SignAI_Companion',
+    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+  if(popup) {
+    popup.addEventListener('load', () => {
+      popup.document.body.classList.add('compact-mode');
+      popup.document.title = 'SignAI Companion';
+    });
+    toast('🪟 Companion popup opened! Position it next to your meeting.');
+  } else {
+    toast('⚠️ Popup blocked — allow popups for this site','warn');
+  }
 }
 
-function toggleZoomCaptions() {
-  zoomCaptionsOn = !zoomCaptionsOn;
-  toast(zoomCaptionsOn ? '💬 Live captions ON' : '💬 Live captions OFF');
+function toggleCompactMode() {
+  document.body.classList.toggle('compact-mode');
+  const isCompact = document.body.classList.contains('compact-mode');
+  toast(isCompact ? '📐 Compact mode ON — minimal UI' : '📐 Compact mode OFF — full UI');
+  if(isCompact) switchMode(1); // Switch to Mode 1 for camera view
 }
 
-function startDemoCaptions() {
-  const phrases = ['Hello everyone','Let\'s discuss the project','Can we see the progress update?','Great work on the presentation','Any questions?','I agree with that approach','Let\'s schedule a follow-up','Thank you all for joining'];
-  let i=0;
-  zoomDemoInterval = setInterval(()=>{
-    if(!zoomConnected) return clearInterval(zoomDemoInterval);
-    addCaption('speaker', phrases[i%phrases.length]);
-    i++;
-  }, 6000);
+function toggleMeetingSTT() {
+  if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)){
+    toast('⚠️ Speech recognition not supported in this browser','warn'); return;
+  }
+  if(meetingSTTActive) {
+    meetingRecognition && meetingRecognition.stop();
+    meetingSTTActive = false;
+    toast('🎤 Stopped listening');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  meetingRecognition = new SR();
+  meetingRecognition.continuous = true;
+  meetingRecognition.interimResults = true;
+  meetingRecognition.lang = 'en-US';
+  meetingRecognition.onstart = () => {
+    meetingSTTActive = true;
+    toast('🎤 Listening to speaker...');
+  };
+  meetingRecognition.onresult = e => {
+    let final = '';
+    for(let i = e.resultIndex; i < e.results.length; i++) {
+      if(e.results[i].isFinal) final += e.results[i][0].transcript;
+    }
+    if(final) {
+      addCaption('speaker', final.trim());
+      addConvoMessage('speaker', final.trim());
+    }
+  };
+  meetingRecognition.onerror = e => { toast('STT error: '+e.error,'warn'); meetingSTTActive = false; };
+  meetingRecognition.onend = () => { if(meetingSTTActive) meetingRecognition.start(); };
+  meetingRecognition.start();
+}
+
+// Platform setup guides
+const PLATFORM_GUIDES = {
+  zoom: {
+    title: '📹 Using SignAI with Zoom',
+    steps: [
+      '<strong>Open your Zoom meeting</strong> — paste the Zoom link above and click "Open Meeting in New Tab", or open the Zoom app separately',
+      '<strong>Position your windows</strong> — put Zoom on one half of the screen and SignAI on the other. On mobile, use Split Screen mode',
+      '<strong>Start SignAI camera</strong> — click "Start Camera" in Companion Tools. SignAI will detect your signs in real-time',
+      '<strong>Sign naturally</strong> — the detected text appears in Mode 1. Use "Speak All" to speak the text aloud into your Zoom meeting',
+      '<strong>Use Quick Phrases</strong> — tap meeting phrases below for instant spoken responses that Zoom will pick up'
+    ],
+    tip: 'Use Picture-in-Picture mode to float your SignAI camera over the Zoom window. Enable "Share Computer Audio" in Zoom for others to hear your TTS.'
+  },
+  meet: {
+    title: '🟢 Using SignAI with Google Meet',
+    steps: [
+      '<strong>Open Google Meet</strong> — paste your meet.google.com link above and click "Open Meeting in New Tab"',
+      '<strong>Allow both cameras</strong> — Google Meet uses one camera, SignAI needs another window. On laptops, share the camera; on phones, use Picture-in-Picture',
+      '<strong>Start Companion Mode</strong> — click "Start Companion Mode" to activate camera and sign detection simultaneously',
+      '<strong>Enable Meet captions</strong> — turn on Google Meet\'s built-in captions (CC button) so you can read what others say',
+      '<strong>Respond with signs</strong> — your signs are converted to text and can be spoken aloud via TTS for all meeting participants to hear'
+    ],
+    tip: 'On Chrome desktop, both Meet and SignAI can share the same webcam. Use the "Listen to Speaker" tool to capture meeting audio.'
+  },
+  teams: {
+    title: '🟣 Using SignAI with Microsoft Teams',
+    steps: [
+      '<strong>Open Teams meeting</strong> — paste the Teams link above and open it in a new tab, or use the Teams desktop app',
+      '<strong>Side-by-side layout</strong> — snap Teams to one side and SignAI to the other using Windows Snap (Win + Arrow keys)',
+      '<strong>Activate companion</strong> — start the camera in SignAI and begin signing. Your signs will be detected in real-time',
+      '<strong>Use Teams Live Captions</strong> — enable live captions in Teams (⋯ → Turn on live captions) to read what others say',
+      '<strong>Quick responses</strong> — use meeting phrases for instant text-to-speech responses that Teams will broadcast'
+    ],
+    tip: 'Teams on desktop supports live captions in 28+ languages. Combine with SignAI\'s detection for full bidirectional communication.'
+  },
+  other: {
+    title: '🌐 Using SignAI with Any Platform',
+    steps: [
+      '<strong>Open your meeting platform</strong> — paste any meeting link (Webex, Discord, Skype, etc.) and open it in a new tab',
+      '<strong>Arrange windows</strong> — place your meeting on one side and SignAI on the other. On mobile, use split-screen or PiP',
+      '<strong>Start camera</strong> — SignAI\'s camera will detect your sign language and convert it to text',
+      '<strong>Speak your signs</strong> — use the "Speak All" or "Auto-Speak" feature to convert your signed text to voice output',
+      '<strong>Read responses</strong> — use the "Listen to Speaker" tool to transcribe what others say in the meeting'
+    ],
+    tip: 'SignAI works with any browser-based meeting platform. For desktop apps, use the Pop-Out Window feature and position it on top.'
+  }
+};
+
+function showGuide(platform) {
+  const guide = PLATFORM_GUIDES[platform];
+  if(!guide) return;
+  document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+  event.target.closest('.platform-tab').classList.add('active');
+  const content = document.getElementById('guideContent');
+  content.innerHTML = `
+    <h4>${guide.title}</h4>
+    <ol>${guide.steps.map(s => '<li>'+s+'</li>').join('')}</ol>
+    <div class="tip">💡 <strong>Pro Tip:</strong> ${guide.tip}</div>
+  `;
+}
+
+// Onboarding
+function showOnboarding() {
+  document.getElementById('onboardingOverlay').classList.add('show');
+}
+function hideOnboarding() {
+  document.getElementById('onboardingOverlay').classList.remove('show');
+  localStorage.setItem('signai_onboarded', 'true');
+}
+
+// Mobile status toggle
+function toggleMobileStatus() {
+  const pills = document.querySelector('.header-pills');
+  if(pills.style.display === 'flex') {
+    pills.style.display = '';
+  } else {
+    pills.style.display = 'flex';
+    pills.style.flexWrap = 'wrap';
+    pills.style.padding = '8px 0';
+  }
 }
 
 function addCaption(from, text) {
@@ -1798,11 +2235,10 @@ function addCaption(from, text) {
 }
 
 function clearCaptions() {
-  document.getElementById('captionBoard').innerHTML='<div class="convo-empty">Captions will appear here during the meeting…</div>';
+  document.getElementById('captionBoard').innerHTML='<div class="convo-empty">Start a meeting session to see captions here…</div>';
 }
 
 function sendMeetingPhrase(phrase) {
-  if(!zoomConnected){toast('⚠️ Join a meeting first','warn');return;}
   addCaption('signer', phrase);
   addConvoMessage('signer', phrase);
   speak(phrase);
@@ -1829,13 +2265,13 @@ function sendConvoMsg() {
   const text = input.value.trim();
   if(!text) return;
   addConvoMessage('signer', text);
-  if(zoomConnected) addCaption('signer', text);
+  addCaption('signer', text);
   speak(text);
   input.value = '';
 }
 
 function clearConvo() {
-  document.getElementById('convoBoard').innerHTML='<div class="convo-empty">Start a meeting to see the conversation…</div>';
+  document.getElementById('convoBoard').innerHTML='<div class="convo-empty">Start companion mode to see the conversation…</div>';
 }
 
 // =====================================================================
@@ -1844,8 +2280,7 @@ function clearConvo() {
 function sendEmergency(phrase) {
   speak(phrase);
   addConvoMessage('signer', '🚨 '+phrase);
-  if(zoomConnected) addCaption('signer', '🚨 URGENT: '+phrase);
-  // Flash screen for attention
+  addCaption('signer', '🚨 URGENT: '+phrase);
   document.body.style.boxShadow='inset 0 0 100px rgba(255,77,109,0.3)';
   setTimeout(()=>document.body.style.boxShadow='',1500);
   toast('🚨 Emergency: '+phrase);
@@ -1883,15 +2318,21 @@ document.addEventListener('keydown', function(e) {
   else if(e.key==='2') switchMode(2);
   else if(e.key==='3') switchMode(3);
   else if(e.key===' '&&currentAppMode===1){e.preventDefault();addSpace();}
-  else if(e.key==='Escape'){if(zoomConnected)leaveZoomMeeting();else if(cameraStream)stopCamera();}
+  else if(e.key==='Escape'){if(cameraStream)stopCamera();}
   else if(e.key==='s'||e.key==='S') speakOutput();
   else if(e.key==='c'||e.key==='C'){if(cameraStream)stopCamera();else startCamera();}
+  else if(e.key==='p'||e.key==='P') launchPiP();
 });
 
 // =====================================================================
 // INIT
 // =====================================================================
+// Show onboarding on first visit
+if(!localStorage.getItem('signai_onboarded')) {
+  setTimeout(()=>showOnboarding(), 800);
+}
 toast('✋ SignAI v3 ready — pick a mode to start!');
 </script>
 </body>
 </html>
+
