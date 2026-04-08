@@ -142,7 +142,7 @@ def health():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 10000))  # just change 5000 to 10000
     debug = os.environ.get('RENDER') is None
     print("\n" + "="*60)
     print("  ✋ SignAI v3.0 — Sign Language Communicator")
