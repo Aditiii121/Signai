@@ -1,7 +1,6 @@
-streamlit
+flask
+flask-cors
 opencv-python
 numpy
 pillow
 mediapipe
-flask
-flask-cors
